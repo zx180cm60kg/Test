@@ -1,6 +1,6 @@
 using UnityEngine;
 using System.Collections;
-
+32/////刘伟123////
 public class yzx_controller : MonoBehaviour
 {
     SteamVR_TrackedObject Hand;
