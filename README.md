@@ -1,37 +1,64 @@
-## Welcome to GitHub Pages
+using UnityEngine;
+using System.Collections;
 
-You can use the [editor on GitHub](https://github.com/zx180cm60kg/Test/edit/master/README.md) to maintain and preview the content for your website in Markdown files.
+public class yzx_controller : MonoBehaviour
+{
+    SteamVR_TrackedObject Hand;
+    SteamVR_Controller.Device device;
 
-Whenever you commit to this repository, GitHub Pages will run [Jekyll](https://jekyllrb.com/) to rebuild the pages in your site, from the content in your Markdown files.
+    bool IsShock = false;  //布尔型变量IsShock
 
-### Markdown
+    // Use this for initialization
+    void Start()
+    {
+        Hand = GetComponent();  //获得SteamVR_ TrackedObject组件  
+    }
 
-Markdown is a lightweight and easy-to-use syntax for styling your writing. It includes conventions for
+    // Update is called once per frame
+    void Update()
+    {
 
-```markdown
-Syntax highlighted code block
+        //防止Start函数没加载成功，保证SteamVR_ TrackedObject组件获取成功！
+        if (Hand.isValid)
+        {
+            Hand = GetComponent();
+        }
+        device = SteamVR_Controller.Input((int)Hand.index);    //根据index，获得手柄 
+                                                               //如果手柄的Trigger键被按下了
+        if (device.GetPressDown(SteamVR_Controller.ButtonMask.Trigger))
+        {
 
-# Header 1
-## Header 2
-### Header 3
+            IsShock = false;  //每次按下，IsShock为false,才能保证手柄震动
+            StartCoroutine("Shock", 0.5f); //开启协程Shock(),第二个参数0.5f 即为协程Shock()的形参
+        }
 
-- Bulleted
-- List
+    }
 
-1. Numbered
-2. List
+    //定义了一个协程
 
-**Bold** and _Italic_ and `Code` text
+    IEnumerator Shock(float durationTime)
 
-[Link](url) and ![Image](src)
-```
+    {
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
+        //Invoke函数，表示durationTime秒后，执行StopShock函数；
+        Invoke("StopShock", durationTime);
 
-### Jekyll Themes
+        //协程一直使得手柄产生震动，直到布尔型变量IsShock为false;
+        while (!IsShock)
+        {
+            device.TriggerHapticPulse(500);
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/zx180cm60kg/Test/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
+            yield return new WaitForEndOfFrame();
 
-### Support or Contact
+        }
 
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
+
+    }
+
+    void StopShock()
+    {
+        IsShock = true; //关闭手柄的震动
+    }
+
+
+}
